@@ -19,6 +19,8 @@
   .wave div:nth-child(5){animation-delay:0.4s;}
   .wave div:nth-child(6){animation-delay:0.5s;}
   @keyframes waveAnim {0%,100%{height:10px;}50%{height:60px;}}
+  .btn-hover:hover { transform: scale(1.05); transition: transform 0.3s; }
+  .icon-placeholder { width:64px; height:64px; background:#E5E7EB; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; color:#9CA3AF; }
 </style>
 </head>
 <body>
@@ -32,25 +34,31 @@
       <h1 class="text-4xl md:text-6xl font-bold mb-4">すべての瞬間を、ありのままに。</h1>
       <h2 class="text-xl md:text-3xl mb-6">M3 MicTrak カメラの上に、スタジオを。</h2>
       <div class="flex justify-center gap-4">
-        <a href="#details" class="px-6 py-3 bg-black text-white rounded-md font-medium hover:bg-gray-800 transition">製品詳細を見る</a>
-        <a href="#compare" class="px-6 py-3 border border-gray-300 rounded-md font-medium hover:bg-gray-100 transition">Mシリーズ比較</a>
+        <a href="#details" class="px-6 py-3 bg-black text-white rounded-md font-medium btn-hover">製品詳細を見る</a>
+        <a href="#compare" class="px-6 py-3 border border-gray-300 rounded-md font-medium btn-hover">Mシリーズ比較</a>
       </div>
     </div>
   </section>
 
   <!-- Features Section -->
-  <section id="details" class="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-    <div class="fade-in space-y-4">
-      <h3 class="text-3xl font-semibold">軽やかに、強く。</h3>
-      <p class="text-gray-600">剛性と軽さを両立したボディ。カメラとの一体感を生む、無駄のないフォルム。現場に溶け込み、作品を支える。</p>
-      <ul class="list-disc pl-5 text-gray-700">
-        <li>軽量設計で持ち運び簡単</li>
-        <li>堅牢なアルミニウムボディ</li>
-        <li>カメラとの統合デザイン</li>
-      </ul>
-    </div>
-    <div class="fade-in w-full aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
-      <span class="text-gray-400">画像/動画プレースホルダー</span>
+  <section id="details" class="max-w-6xl mx-auto px-6 py-20 space-y-12">
+    <h3 class="text-3xl font-semibold text-center fade-in">特徴</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div class="fade-in text-center space-y-4">
+        <div class="icon-placeholder">軽量</div>
+        <h4 class="font-semibold text-xl">軽量設計</h4>
+        <p class="text-gray-600">長時間撮影でも負担にならない軽量ボディ。</p>
+      </div>
+      <div class="fade-in text-center space-y-4">
+        <div class="icon-placeholder">堅牢</div>
+        <h4 class="font-semibold text-xl">堅牢ボディ</h4>
+        <p class="text-gray-600">アルミニウム構造で衝撃や現場環境にも強い。</p>
+      </div>
+      <div class="fade-in text-center space-y-4">
+        <div class="icon-placeholder">操作性</div>
+        <h4 class="font-semibold text-xl">直感操作</h4>
+        <p class="text-gray-600">カメラとの一体感でストレスなく操作可能。</p>
+      </div>
     </div>
   </section>
 
@@ -61,19 +69,84 @@
       <div class="text-gray-400 text-sm">32bitフロート録音波形デモ</div>
     </div>
     <div class="fade-in space-y-4">
-      <h3 class="text-3xl font-semibold">音の限界をなくす。</h3>
-      <p class="text-gray-600">32bitフロート録音が、どんな環境でもディテールを逃さない。爆音も静寂も、そのままのバランスで残す。</p>
+      <h3 class="text-3xl font-semibold">音の限界をなくす</h3>
+      <p class="text-gray-600">32bitフロート録音で、爆音も静寂もそのまま再現。プロフェッショナル現場でも安心。</p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>-120dBのノイズフロア</li>
+        <li>全周囲収音に対応</li>
+        <li>ワンタッチでレベル調整可能</li>
+      </ul>
     </div>
   </section>
 
   <!-- Design Section -->
   <section class="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
     <div class="fade-in w-full aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
-      <span class="text-gray-400">デザイン詳細画像プレースホルダー</span>
+      <span class="text-gray-400">デザイン画像プレースホルダー</span>
     </div>
     <div class="fade-in space-y-4">
       <h3 class="text-3xl font-semibold">洗練されたデザイン</h3>
-      <p class="text-gray-600">無駄を削ぎ落とした美しいフォルムと操作性。現場での使いやすさとスタジオ品質の両立。</p>
+      <p class="text-gray-600">余計なものを削ぎ落とした美しいフォルム。操作性と美しさの両立。</p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>スリムで軽量なボディ</li>
+        <li>滑らかな曲線と角丸デザイン</li>
+        <li>現場でも扱いやすい直感操作</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Scenes Section -->
+  <section class="max-w-6xl mx-auto px-6 py-20 space-y-12">
+    <h3 class="text-3xl font-semibold text-center fade-in">使用シーン</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="fade-in aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
+        <span class="text-gray-400">屋外撮影</span>
+      </div>
+      <div class="fade-in aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
+        <span class="text-gray-400">スタジオ録音</span>
+      </div>
+      <div class="fade-in aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
+        <span class="text-gray-400">ライブ収録</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Section -->
+  <section id="compare" class="max-w-6xl mx-auto px-6 py-20 space-y-12 fade-in">
+    <h3 class="text-3xl font-semibold text-center">Mシリーズ比較</h3>
+    <table class="w-full table-auto border border-gray-200 text-left">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="px-4 py-2">モデル</th>
+          <th class="px-4 py-2">重量</th>
+          <th class="px-4 py-2">録音形式</th>
+          <th class="px-4 py-2">価格</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-t">
+          <td class="px-4 py-2">M1</td>
+          <td class="px-4 py-2">200g</td>
+          <td class="px-4 py-2">24bit/48kHz</td>
+          <td class="px-4 py-2">¥30,000</td>
+        </tr>
+        <tr class="border-t">
+          <td class="px-4 py-2">M2</td>
+          <td class="px-4 py-2">220g</td>
+          <td class="px-4 py-2">24bit/96kHz</td>
+          <td class="px-4 py-2">¥45,000</td>
+        </tr>
+        <tr class="border-t">
+          <td class="px-4 py-2 font-bold">M3</td>
+          <td class="px-4 py-2">240g</td>
+          <td class="px-4 py-2">32bitフロート</td>
+          <td class="px-4 py-2 font-bold">¥60,000</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="flex justify-center mt-8 gap-4">
+      <a href="#buy" class="px-6 py-3 bg-black text-white rounded-md font-medium btn-hover">購入する</a>
+      <a href="#details" class="px-6 py-3 border border-gray-300 rounded-md font-medium btn-hover">詳細を見る</a>
     </div>
   </section>
 
@@ -82,8 +155,8 @@
     <h3 class="text-3xl font-semibold">それは、記録ではなく、体験。</h3>
     <p class="text-gray-600 mt-4">あなたの映像が語るすべてを、音が支える。M3 MicTrak。映像の中に、真実の音を。</p>
     <div class="mt-8 flex justify-center gap-4">
-      <a href="#buy" class="px-6 py-3 bg-black text-white rounded-md font-medium hover:bg-gray-800 transition">製品詳細を見る</a>
-      <a href="#compare" class="px-6 py-3 border border-gray-300 rounded-md font-medium hover:bg-gray-100 transition">Mシリーズ比較</a>
+      <a href="#buy" class="px-6 py-3 bg-black text-white rounded-md font-medium btn-hover">製品詳細を見る</a>
+      <a href="#compare" class="px-6 py-3 border border-gray-300 rounded-md font-medium btn-hover">Mシリーズ比較</a>
     </div>
   </section>
 
