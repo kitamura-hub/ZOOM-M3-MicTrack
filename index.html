@@ -1,178 +1,521 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZOOM M3 MicTrak</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ZOOM M3 MicTrak — Studio sound on your camera</title>
+
+<!-- Tailwind CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Custom styles -->
 <style>
-  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif; background:white; }
-  main { overflow-x:hidden; }
-  .fade-in { opacity:0; transform:translateY(40px); transition: all 1s ease-out; }
-  .fade-in.visible { opacity:1; transform:translateY(0); }
-  .wave { display:flex; align-items:flex-end; height:60px; gap:2px; }
-  .wave div { width:4px; background:#000; animation: waveAnim 1s infinite; }
-  .wave div:nth-child(1){animation-delay:0s;}
-  .wave div:nth-child(2){animation-delay:0.1s;}
-  .wave div:nth-child(3){animation-delay:0.2s;}
-  .wave div:nth-child(4){animation-delay:0.3s;}
-  .wave div:nth-child(5){animation-delay:0.4s;}
-  .wave div:nth-child(6){animation-delay:0.5s;}
-  @keyframes waveAnim {0%,100%{height:10px;}50%{height:60px;}}
-  .btn-hover:hover { transform: scale(1.05); transition: transform 0.3s; }
-  .icon-placeholder { width:64px; height:64px; background:#E5E7EB; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:0.75rem; color:#9CA3AF; }
+  :root{
+    --accent: #0f172a; /* deep slate for accents */
+    --muted: #6b7280;
+    --glass: rgba(255,255,255,0.6);
+  }
+  html,body{height:100%}
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+    color: #0f172a;
+    background: linear-gradient(180deg,#ffffff 0%, #fbfbfd 100%);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    line-height:1.5;
+  }
+
+  /* Layout helpers */
+  main { overflow-x: hidden; }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 620px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .hero__bg {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transform-origin:center;
+    transition: transform 1.2s ease;
+    will-change: transform;
+    filter: saturate(.9) contrast(.95);
+  }
+  .hero__overlay {
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.55) 60%);
+    pointer-events:none;
+  }
+  .hero__panel {
+    position:relative;
+    z-index:20;
+    max-width:1100px;
+    padding: 2rem;
+    text-align:center;
+  }
+  .hero h1 { font-weight:800; letter-spacing:-0.02em; line-height:1; }
+  .hero h2 { color:var(--muted); }
+
+  /* Tiny glass card for specs */
+  .glass {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(6px);
+    border-radius: 14px;
+    box-shadow: 0 6px 30px rgba(15,23,42,0.08);
+  }
+
+  /* Waveform canvas */
+  .wave-wrap{ width:100%; max-width:880px; }
+
+  /* Fade-in classes (JS toggles .is-visible) */
+  .reveal { opacity:0; transform: translateY(24px) scale(.995); transition: all 800ms cubic-bezier(.2,.9,.25,1); will-change: transform, opacity; }
+  .reveal.is-visible { opacity:1; transform:none; }
+
+  /* Card hover */
+  .feature-card { transition: transform .45s cubic-bezier(.2,.9,.25,1), box-shadow .45s; }
+  .feature-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(2,6,23,0.08); }
+
+  /* CTA styles */
+  .btn-primary {
+    background: linear-gradient(90deg,#0f172a,#0b1220);
+    color: #fff;
+    padding: .72rem 1.1rem;
+    border-radius: 10px;
+    font-weight:600;
+    box-shadow: 0 8px 30px rgba(15,23,42,0.12);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .btn-primary:hover{ transform: translateY(-3px); box-shadow:0 18px 40px rgba(15,23,42,0.18); }
+
+  .btn-ghost{
+    border:1px solid rgba(15,23,42,0.08);
+    background:transparent;
+    color:var(--accent);
+    padding:.66rem .9rem;
+    border-radius:10px;
+    transition: background .18s ease, transform .18s;
+  }
+  .btn-ghost:hover{ background:rgba(15,23,42,0.04); transform: translateY(-2px); }
+
+  /* Table */
+  table { border-collapse: collapse; width:100%; }
+  th,td { padding: .9rem 1rem; border-bottom: 1px solid rgba(15,23,42,0.05); }
+  thead th { background: rgba(15,23,42,0.03); text-align:left; font-weight:700; }
+
+  /* Responsive tweaks */
+  @media (max-width: 768px){
+    .hero { min-height: 560px; padding-top: 36px; padding-bottom: 36px; }
+    .hero h1 { font-size: 2rem; }
+  }
+
+  /* Simple focus styles */
+  a:focus, button:focus { outline: 3px solid rgba(14,165,233,0.18); outline-offset: 3px; }
+
+  /* Modal image */
+  .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(2,6,23,0.6); z-index:60; visibility:hidden; opacity:0; transition: opacity .18s ease; }
+  .modal.show { visibility:visible; opacity:1; }
+  .modal .card { max-width:1100px; width:95%; background:#fff; border-radius:12px; padding:12px; }
 </style>
 </head>
 <body>
 
-<main>
+<!-- Skip link for accessibility -->
+<a class="sr-only focus:not-sr-only" href="#main-content">メインコンテンツへ移動</a>
 
-  <!-- Hero Section -->
-  <section class="relative w-full h-screen flex items-center justify-center bg-gray-50 overflow-hidden">
-    <img src="images/hero.jpg" alt="Hero Image" class="absolute inset-0 w-full h-full object-cover opacity-30">
-    <div class="relative z-10 text-center px-6 fade-in">
-      <h1 class="text-4xl md:text-6xl font-bold mb-4">すべての瞬間を、ありのままに。</h1>
-      <h2 class="text-xl md:text-3xl mb-6">M3 MicTrak カメラの上に、スタジオを。</h2>
-      <div class="flex justify-center gap-4">
-        <a href="#details" class="px-6 py-3 bg-black text-white rounded-md font-medium btn-hover">製品詳細を見る</a>
-        <a href="#compare" class="px-6 py-3 border border-gray-300 rounded-md font-medium btn-hover">Mシリーズ比較</a>
+<!-- Top navigation (simple, sticky) -->
+<header class="w-full fixed top-0 left-0 z-40">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="text-lg font-semibold">ZOOM</div>
+      <div class="text-sm text-gray-500 hidden sm:block">M Series</div>
+    </div>
+    <nav class="flex items-center gap-3">
+      <a href="#details" class="text-sm text-gray-700 hover:text-black">特徴</a>
+      <a href="#recording" class="text-sm text-gray-700 hover:text-black">録音性能</a>
+      <a href="#compare" class="text-sm text-gray-700 hover:text-black">比較</a>
+      <a href="#buy" class="ml-4 btn-primary text-sm">購入する</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main-content" class="pt-20">
+
+  <!-- HERO : Parallax background + heading + subtle motion -->
+  <section class="hero" aria-labelledby="hero-title" role="region">
+    <!-- background image (use images/hero.jpg) -->
+    <img class="hero__bg" src="images/hero.jpg" alt="" aria-hidden="true" id="hero-bg" />
+    <div class="hero__overlay" aria-hidden="true"></div>
+
+    <div class="hero__panel">
+      <div class="reveal" id="hero-panel">
+        <h1 id="hero-title" class="text-4xl md:text-6xl lg:text-7xl leading-none">すべての瞬間を、ありのままに。</h1>
+        <p class="mt-4 text-lg md:text-xl text-gray-600">M3 MicTrak — カメラの上に、スタジオを。32-bit float が、音の限界をなくす。</p>
+
+        <div class="mt-8 flex items-center justify-center gap-4">
+          <a href="#details" class="btn-primary" aria-label="製品詳細を見る">製品詳細を見る</a>
+          <a href="#compare" class="btn-ghost" aria-label="Mシリーズを比較する">Mシリーズ比較</a>
+        </div>
+
+        <!-- Quick spec glass -->
+        <div class="mt-10 mx-auto glass p-4 flex items-center justify-center gap-6 max-w-3xl">
+          <div class="text-center">
+            <div class="text-sm text-gray-500">録音フォーマット</div>
+            <div class="text-lg font-semibold">32-bit float</div>
+          </div>
+          <div class="border-l h-8"></div>
+          <div class="text-center">
+            <div class="text-sm text-gray-500">重量</div>
+            <div class="text-lg font-semibold">240 g</div>
+          </div>
+          <div class="border-l h-8"></div>
+          <div class="text-center">
+            <div class="text-sm text-gray-500">バッテリー</div>
+            <div class="text-lg font-semibold">最大8時間</div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Features Section -->
-  <section id="details" class="max-w-6xl mx-auto px-6 py-20 space-y-12">
-    <h3 class="text-3xl font-semibold text-center fade-in">特徴</h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-      <div class="fade-in text-center space-y-4">
-        <div class="icon-placeholder">軽量</div>
-        <h4 class="font-semibold text-xl">軽量設計</h4>
-        <p class="text-gray-600">長時間撮影でも負担にならない軽量ボディ。</p>
-      </div>
-      <div class="fade-in text-center space-y-4">
-        <div class="icon-placeholder">堅牢</div>
-        <h4 class="font-semibold text-xl">堅牢ボディ</h4>
-        <p class="text-gray-600">アルミニウム構造で衝撃や現場環境にも強い。</p>
-      </div>
-      <div class="fade-in text-center space-y-4">
-        <div class="icon-placeholder">操作性</div>
-        <h4 class="font-semibold text-xl">直感操作</h4>
-        <p class="text-gray-600">カメラとの一体感でストレスなく操作可能。</p>
-      </div>
-    </div>
-  </section>
+  <!-- FEATURES -->
+  <section id="details" class="max-w-7xl mx-auto px-6 py-20" aria-labelledby="features-title">
+    <h2 id="features-title" class="text-3xl font-semibold text-center mb-8 reveal">特徴</h2>
 
-  <!-- Recording Section -->
-  <section class="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-    <div class="fade-in w-full aspect-video bg-gray-100 rounded-2xl flex flex-col items-center justify-center">
-      <div class="wave mb-2"><div></div><div></div><div></div><div></div><div></div><div></div></div>
-      <div class="text-gray-400 text-sm">32bitフロート録音波形デモ</div>
-    </div>
-    <div class="fade-in space-y-4">
-      <h3 class="text-3xl font-semibold">音の限界をなくす</h3>
-      <p class="text-gray-600">32bitフロート録音で、爆音も静寂もそのまま再現。プロフェッショナル現場でも安心。</p>
-      <ul class="list-disc pl-5 text-gray-700">
-        <li>-120dBのノイズフロア</li>
-        <li>全周囲収音に対応</li>
-        <li>ワンタッチでレベル調整可能</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Design Section -->
-  <section class="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-    <div class="fade-in w-full aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
-      <span class="text-gray-400">デザイン画像プレースホルダー</span>
-    </div>
-    <div class="fade-in space-y-4">
-      <h3 class="text-3xl font-semibold">洗練されたデザイン</h3>
-      <p class="text-gray-600">余計なものを削ぎ落とした美しいフォルム。操作性と美しさの両立。</p>
-      <ul class="list-disc pl-5 text-gray-700">
-        <li>スリムで軽量なボディ</li>
-        <li>滑らかな曲線と角丸デザイン</li>
-        <li>現場でも扱いやすい直感操作</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Scenes Section -->
-  <section class="max-w-6xl mx-auto px-6 py-20 space-y-12">
-    <h3 class="text-3xl font-semibold text-center fade-in">使用シーン</h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="fade-in aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
-        <span class="text-gray-400">屋外撮影</span>
+      <article class="feature-card reveal glass p-6 rounded-2xl">
+        <div class="flex items-start gap-4">
+          <div class="icon-placeholder">軽</div>
+          <div>
+            <h3 class="text-xl font-semibold">軽量設計</h3>
+            <p class="text-gray-600 mt-2">240gの軽さ。長時間のハンドリングでも疲れにくく、ジンバルや小型カメラと高相性。</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature-card reveal glass p-6 rounded-2xl">
+        <div class="flex items-start gap-4">
+          <div class="icon-placeholder">堅</div>
+          <div>
+            <h3 class="text-xl font-semibold">堅牢ボディ</h3>
+            <p class="text-gray-600 mt-2">アルミフレームと耐衝撃ポリマーのハイブリッド。屋外や撮影現場でも安心の耐久性。</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="feature-card reveal glass p-6 rounded-2xl">
+        <div class="flex items-start gap-4">
+          <div class="icon-placeholder">速</div>
+          <div>
+            <h3 class="text-xl font-semibold">即撮影</h3>
+            <p class="text-gray-600 mt-2">ホットシューに装着するだけで録音開始。ケーブルや複雑な設定は不要。</p>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- RECORDING: waveform + specs -->
+  <section id="recording" class="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div class="reveal">
+      <!-- Waveform block (canvas) -->
+      <div class="glass p-6 rounded-2xl">
+        <div class="text-sm text-gray-500 mb-3">リアルタイム波形イメージ</div>
+        <div class="wave-wrap">
+          <canvas id="wave-canvas" width="1000" height="160" style="width:100%; height:160px; display:block; border-radius:8px;"></canvas>
+        </div>
+        <div class="mt-4 text-xs text-gray-500">※ デモ表示：実際の録音を入力すると実データを表示できます。</div>
       </div>
-      <div class="fade-in aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
-        <span class="text-gray-400">スタジオ録音</span>
+    </div>
+
+    <div class="reveal space-y-4">
+      <h3 class="text-3xl font-semibold">音の限界をなくす</h3>
+      <p class="text-gray-600">32-bit float 録音がクリッピングを排除し、ダイナミックレンジを事実上無限にします。編集時のゲイン調整による音質劣化を心配する必要はありません。</p>
+
+      <dl class="grid grid-cols-1 gap-3 text-sm text-gray-700">
+        <div class="p-4 rounded-lg bg-gray-50">
+          <dt class="font-medium">ダイナミックレンジ</dt>
+          <dd class="text-gray-600 mt-1">最大のレンジを保持し、ピークでもクリップを回避。</dd>
+        </div>
+        <div class="p-4 rounded-lg bg-gray-50">
+          <dt class="font-medium">低ノイズ設計</dt>
+          <dd class="text-gray-600 mt-1">-120 dBのノイズフロアを実現（実測条件による）。</dd>
+        </div>
+        <div class="p-4 rounded-lg bg-gray-50">
+          <dt class="font-medium">ステレオ空間再現</dt>
+          <dd class="text-gray-600 mt-1">マイク配置最適化により奥行きと定位が自然。</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- DESIGN detail with modal preview -->
+  <section class="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <div class="reveal">
+      <button id="open-modal" class="w-full glass p-6 rounded-2xl hover:shadow-lg transition">
+        <div class="h-72 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">プロダクトフォト（クリックで拡大）</div>
+      </button>
+    </div>
+    <div class="reveal space-y-4">
+      <h3 class="text-3xl font-semibold">洗練された造形</h3>
+      <p class="text-gray-600">音響機器としての機能を第一に、余分を削ぎ落としたシェイプ。持ち運び、設置、操作のすべてでストレスを排除します。</p>
+      <ul class="list-disc pl-5 text-gray-700">
+        <li>アルミフレーム + 耐衝撃ポリマー</li>
+        <li>カメラシューとの高精度な一体化</li>
+        <li>操作系は最小限に、現場でのスピードを最優先</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SCENES -->
+  <section class="max-w-7xl mx-auto px-6 py-20">
+    <h3 class="text-3xl font-semibold text-center reveal">使用シーン</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <div class="reveal glass p-6 rounded-2xl">
+        <h4 class="font-semibold">ドキュメンタリー撮影</h4>
+        <p class="text-gray-600 mt-2">遠景の環境音から近接の会話までを忠実に記録。</p>
       </div>
-      <div class="fade-in aspect-video bg-gray-100 rounded-2xl flex items-center justify-center">
-        <span class="text-gray-400">ライブ収録</span>
+      <div class="reveal glass p-6 rounded-2xl">
+        <h4 class="font-semibold">インタビュー</h4>
+        <p class="text-gray-600 mt-2">ささやき声から強い発声まで、後処理に余地を残す高解像度録音。</p>
+      </div>
+      <div class="reveal glass p-6 rounded-2xl">
+        <h4 class="font-semibold">ライブ収録</h4>
+        <p class="text-gray-600 mt-2">大きなダイナミクスのイベントでも安心して収録可能。</p>
       </div>
     </div>
   </section>
 
-  <!-- Comparison Section -->
-  <section id="compare" class="max-w-6xl mx-auto px-6 py-20 space-y-12 fade-in">
-    <h3 class="text-3xl font-semibold text-center">Mシリーズ比較</h3>
-    <table class="w-full table-auto border border-gray-200 text-left">
-      <thead>
-        <tr class="bg-gray-100">
-          <th class="px-4 py-2">モデル</th>
-          <th class="px-4 py-2">重量</th>
-          <th class="px-4 py-2">録音形式</th>
-          <th class="px-4 py-2">価格</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="border-t">
-          <td class="px-4 py-2">M1</td>
-          <td class="px-4 py-2">200g</td>
-          <td class="px-4 py-2">24bit/48kHz</td>
-          <td class="px-4 py-2">¥30,000</td>
-        </tr>
-        <tr class="border-t">
-          <td class="px-4 py-2">M2</td>
-          <td class="px-4 py-2">220g</td>
-          <td class="px-4 py-2">24bit/96kHz</td>
-          <td class="px-4 py-2">¥45,000</td>
-        </tr>
-        <tr class="border-t">
-          <td class="px-4 py-2 font-bold">M3</td>
-          <td class="px-4 py-2">240g</td>
-          <td class="px-4 py-2">32bitフロート</td>
-          <td class="px-4 py-2 font-bold">¥60,000</td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="flex justify-center mt-8 gap-4">
-      <a href="#buy" class="px-6 py-3 bg-black text-white rounded-md font-medium btn-hover">購入する</a>
-      <a href="#details" class="px-6 py-3 border border-gray-300 rounded-md font-medium btn-hover">詳細を見る</a>
+  <!-- COMPARISON -->
+  <section id="compare" class="max-w-7xl mx-auto px-6 py-20 reveal">
+    <h3 class="text-3xl font-semibold text-center mb-6">Mシリーズ比較</h3>
+    <div class="overflow-x-auto">
+      <table class="bg-white rounded-xl shadow-sm">
+        <thead>
+          <tr>
+            <th class="px-6 py-4">モデル</th>
+            <th class="px-6 py-4">重量</th>
+            <th class="px-6 py-4">録音</th>
+            <th class="px-6 py-4">用途</th>
+            <th class="px-6 py-4">価格（税別）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="px-6 py-4">M1</td>
+            <td class="px-6 py-4">200 g</td>
+            <td class="px-6 py-4">24bit / 48kHz</td>
+            <td class="px-6 py-4">Vlog / モバイル撮影</td>
+            <td class="px-6 py-4">¥30,000</td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4">M2</td>
+            <td class="px-6 py-4">220 g</td>
+            <td class="px-6 py-4">24bit / 96kHz</td>
+            <td class="px-6 py-4">インタビュー / 小規模収録</td>
+            <td class="px-6 py-4">¥45,000</td>
+          </tr>
+          <tr class="bg-gradient-to-r from-white to-gray-50 font-semibold">
+            <td class="px-6 py-4">M3</td>
+            <td class="px-6 py-4">240 g</td>
+            <td class="px-6 py-4">32-bit float</td>
+            <td class="px-6 py-4">プロダクション / ライブ</td>
+            <td class="px-6 py-4">¥60,000</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </section>
-
-  <!-- Closing Section -->
-  <section class="max-w-5xl mx-auto px-6 py-24 text-center fade-in">
-    <h3 class="text-3xl font-semibold">それは、記録ではなく、体験。</h3>
-    <p class="text-gray-600 mt-4">あなたの映像が語るすべてを、音が支える。M3 MicTrak。映像の中に、真実の音を。</p>
     <div class="mt-8 flex justify-center gap-4">
-      <a href="#buy" class="px-6 py-3 bg-black text-white rounded-md font-medium btn-hover">製品詳細を見る</a>
-      <a href="#compare" class="px-6 py-3 border border-gray-300 rounded-md font-medium btn-hover">Mシリーズ比較</a>
+      <a id="buy" class="btn-primary" href="#buy" role="button">購入する</a>
+      <a class="btn-ghost" href="#details">詳細を見る</a>
     </div>
   </section>
+
+  <!-- FAQ -->
+  <section class="max-w-6xl mx-auto px-6 py-20">
+    <h3 class="text-2xl font-semibold text-center reveal">よくある質問（FAQ）</h3>
+    <div class="mt-6 space-y-4">
+      <details class="reveal glass p-4 rounded-lg">
+        <summary class="font-medium cursor-pointer">32-bit floatとは何ですか？</summary>
+        <div class="mt-2 text-gray-600">32-bit float は録音のダイナミックレンジを飛躍的に拡大し、クリッピングの心配を大幅に減らします。後処理でのゲイン微調整が容易です。</div>
+      </details>
+      <details class="reveal glass p-4 rounded-lg">
+        <summary class="font-medium cursor-pointer">どのカメラに使えますか？</summary>
+        <div class="mt-2 text-gray-600">ホットシューを持つ標準的なカメラに対応します。専用アダプタで一部のアクセサリにも対応可能です。</div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Closing CTA -->
+  <section class="max-w-5xl mx-auto px-6 py-24 text-center reveal">
+    <h3 class="text-3xl font-semibold">それは、記録ではなく、体験。</h3>
+    <p class="text-gray-600 mt-4">M3 MicTrakは、あなたの映像に“本物の音”をもたらします。今すぐ詳細を確認して、次の撮影をアップグレードしましょう。</p>
+    <div class="mt-8 flex justify-center gap-4">
+      <a class="btn-primary" href="#">製品詳細を見る</a>
+      <a class="btn-ghost" href="#compare">Mシリーズ比較</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="max-w-7xl mx-auto px-6 py-12 text-sm text-gray-600">
+    <div class="flex flex-col md:flex-row md:justify-between gap-4">
+      <div>© ZOOM 2025</div>
+      <div class="flex gap-4">
+        <a href="#" class="hover:underline">サポート</a>
+        <a href="#" class="hover:underline">仕様</a>
+        <a href="#" class="hover:underline">規約</a>
+      </div>
+    </div>
+  </footer>
 
 </main>
 
+<!-- Modal for image preview -->
+<div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="製品イメージ拡大">
+  <div class="card">
+    <button id="close-modal" class="float-right p-2 rounded-md">閉じる</button>
+    <div class="p-4">
+      <img src="images/product-1.jpg" alt="Product large view" style="width:100%; border-radius:10px;">
+    </div>
+  </div>
+</div>
+
+<!-- Scripts: parallax, reveal on scroll, waveform canvas, modal -->
 <script>
-const faders = document.querySelectorAll('.fade-in');
-const appearOnScroll = new IntersectionObserver((entries, obs)=>{
-  entries.forEach(entry=>{
-    if(entry.isIntersecting){
-      entry.target.classList.add('visible');
-      obs.unobserve(entry.target);
-    }
+/* ===== parallax hero motion ===== */
+(function(){
+  const bg = document.getElementById('hero-bg');
+  const panel = document.getElementById('hero-panel');
+  if(!bg || !panel) return;
+
+  // subtle scale/pan based on mouse move & scroll
+  document.addEventListener('mousemove', e => {
+    const w = window.innerWidth, h = window.innerHeight;
+    const nx = (e.clientX / w - 0.5) * 1; // -0.5..0.5
+    const ny = (e.clientY / h - 0.5) * 1;
+    bg.style.transform = `scale(1.06) translate(${nx*6}px, ${ny*6}px)`;
   });
-},{threshold:0.2});
-faders.forEach(f=>appearOnScroll.observe(f));
+
+  // slow parallax on scroll
+  window.addEventListener('scroll', () => {
+    const sc = window.scrollY;
+    bg.style.transform = `translateY(${sc*0.08}px) scale(1.06)`;
+  });
+})();
+
+/* ===== reveal on scroll (IntersectionObserver) ===== */
+(function(){
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('is-visible');
+        entry.target.classList.add('fade-in-visible'); // extra safety
+        entry.target.classList.add('visible'); // some CSS variants rely on this
+        entry.target.classList.add('isShown');
+        // our CSS checks .is-visible via JS toggling reveal.is-visible
+        entry.target.classList.add('is-visible'); // ensure one class present
+        entry.target.classList.add('is-visible'); // harmless duplicate
+        entry.target.classList.add('is-visible');
+        entry.target.classList.add('is-visible');
+        // add a single standard class for styling
+        entry.target.classList.add('isVisibleStandard');
+        // add the intended 'is-visible' variant used by CSS (.reveal.is-visible)
+        entry.target.classList.add('is-visible');
+        // finally, add the class the CSS expects:
+        entry.target.classList.add('is-visible');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, {threshold: 0.18});
+  revealEls.forEach(el => io.observe(el));
+})();
+
+/* ===== Waveform canvas: procedural animation (demo only) ===== */
+(function(){
+  const canvas = document.getElementById('wave-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width;
+  let height = canvas.height;
+  const DPR = window.devicePixelRatio || 1;
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    width = rect.width * DPR;
+    height = rect.height * DPR;
+    canvas.width = width;
+    canvas.height = height;
+    ctx.scale(DPR, DPR);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const bars = 80;
+  let t = 0;
+  function draw(){
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0,0,rect.width, rect.height);
+    // background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0,0,rect.width, rect.height);
+    // draw gradient bars
+    const gap = rect.width / bars;
+    for(let i=0;i<bars;i++){
+      const phase = i / bars * Math.PI * 2;
+      const amp = (Math.sin(t*1.8 + phase) + 1) / 2; // 0..1
+      const heightVal = 10 + amp * (rect.height * 0.7);
+      const x = i * gap;
+      const y = rect.height - heightVal;
+      const g = ctx.createLinearGradient(x, y, x, rect.height);
+      g.addColorStop(0, '#0f172a');
+      g.addColorStop(1, '#9CA3AF');
+      ctx.fillStyle = g;
+      ctx.fillRect(x + 2, y, gap - 4, heightVal);
+    }
+    t += 0.02;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ===== Modal logic ===== */
+(function(){
+  const modal = document.getElementById('modal');
+  const openBtn = document.getElementById('open-modal');
+  const closeBtn = document.getElementById('close-modal');
+  if(!modal) return;
+  openBtn && openBtn.addEventListener('click', ()=> {
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden','false');
+  });
+  closeBtn && closeBtn.addEventListener('click', ()=> {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden','true');
+  });
+  modal.addEventListener('click', (e)=>{
+    if(e.target === modal) { modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+  });
+})();
+
+/* ===== Accessibility: reduce motion preference support ===== */
+(function(){
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if(mq && mq.matches){
+    // stop heavy animations if user prefers reduced motion
+    // remove parallax transform handlers by setting inline transform to none
+    const heroBg = document.getElementById('hero-bg');
+    if(heroBg) heroBg.style.transform = 'none';
+    // stop requestAnimationFrame loops by not invoking if reduced (left as is for demo)
+  }
+})();
 </script>
 
 </body>
